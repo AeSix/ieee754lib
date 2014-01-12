@@ -134,11 +134,17 @@ public abstract class IEEE754
 	
 	private IEEE754() {}
 	
-	protected abstract void toBytesImpl(IEEE754Format format, BitWriter out);
-	
 	private static void assertValidFormat(IEEE754Format format)
 	{
+		if ((format.getExponentLength() + format.getMantissaLength() + 1) % 8 
+				!= 0)
+		{
+			throw new IllegalArgumentException(
+					"exponentLength + mantissaLength + 1 must be divisible by 8");
+		}
 	}
+	
+	protected abstract void toBytesImpl(IEEE754Format format, BitWriter out);
 	
 	public final void toBytes(IEEE754Format format, BitWriter out)
 	{
@@ -146,15 +152,10 @@ public abstract class IEEE754
 		toBytesImpl(format, out);
 	}
 	
-	public final void toBytes(IEEE754Standard standard, BitWriter out)
-	{
-		toBytesImpl(standard, out);
-	}
-	
 	public final double toDouble()
 	{
 		ByteBuffer buf = ByteBuffer.allocate(8);
-		toBytes(IEEE754Standard.DOUBLE, BitWriter.wrap(buf));
+		toBytesImpl(IEEE754Standard.DOUBLE, BitWriter.wrap(buf));
 		buf.rewind();
 		return buf.asDoubleBuffer().get();
 	}
@@ -167,13 +168,7 @@ public abstract class IEEE754
 	
 	public static IEEE754 decode(IEEE754Format format, BitReader in)
 	{
-		if ((format.getExponentLength() + format.getMantissaLength() + 1) % 8 
-				!= 0)
-		{
-			throw new IllegalArgumentException(
-					"exponentLength + mantissaLength + 1 must be divisible by 8");
-		}
-
+		assertValidFormat(format);
 		boolean negative = in.readBit();
 		BigInteger exponentBits = BigInteger.ZERO;
 		for (int i = format.getExponentLength() - 1; i >= 0; i--)
