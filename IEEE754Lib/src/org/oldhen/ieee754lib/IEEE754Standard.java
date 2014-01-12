@@ -1,4 +1,4 @@
-package ieee754lib;
+package org.oldhen.ieee754lib;
 
 import java.math.BigInteger;
 
