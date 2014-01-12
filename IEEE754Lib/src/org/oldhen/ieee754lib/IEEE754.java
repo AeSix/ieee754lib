@@ -44,9 +44,10 @@ public abstract class IEEE754
 			{
 				out.writeBit(exponent);
 			}
-			for (int i = 0; i < format.getMantissaLength(); i++)
+			out.writeBit(mantissa);
+			for (int i = 1; i < format.getMantissaLength(); i++)
 			{
-				out.writeBit(mantissa);
+				out.writeBit(false);
 			}
 		}
 	}
@@ -158,6 +159,14 @@ public abstract class IEEE754
 		toBytesImpl(IEEE754Standard.DOUBLE, BitWriter.wrap(buf));
 		buf.rewind();
 		return buf.asDoubleBuffer().get();
+	}
+	
+	public final float toFloat()
+	{
+		ByteBuffer buf = ByteBuffer.allocate(4);
+		toBytesImpl(IEEE754Standard.SINGLE, BitWriter.wrap(buf));
+		buf.rewind();
+		return buf.asFloatBuffer().get();
 	}
 	
 	@Override
